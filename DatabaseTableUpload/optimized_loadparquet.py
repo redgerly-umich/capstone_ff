@@ -6,6 +6,7 @@ import time
 
 # Load non-standard libraries
 import pyarrow.parquet as pq
+import numpy as np
 
 # Load custom functions
 import sqlactions
@@ -37,6 +38,7 @@ def read_parquet(parquet_file):
     for chunk in parquet_data.iter_batches():
         
         parquet_df = chunk.to_pandas()
+        parquet_df = parquet_df.replace({np.inf: None, -np.inf: None, np.nan: None})
         
         for row in parquet_df.itertuples(index=False):
             yield row
