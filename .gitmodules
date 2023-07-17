@@ -1,3 +1,4 @@
 [submodule "PrivacyFilter"]
 	path = PrivacyFilter
 	url = https://github.com/lmeulen/PrivacyFilter.git
+	ignore = dirty

@@ -1,5 +1,8 @@
 # Ignore directories
 DatabaseTableUpload/assets/**
+do_not_commit/**
+.idea/**
+en_web_core_trf_updated/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
