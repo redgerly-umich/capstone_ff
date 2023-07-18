@@ -1,11 +1,35 @@
 # Load modules
-import pandas as pd 
+import pandas as pd
+import pyarrow.parquet as pq 
 import xml.etree.ElementTree as ET
+import html
+import time
 
 # Set the notebook to display all columns of a dataframe
 pd.set_option('display.max_columns', None)
 
-def parse_xml(xml_str, in_dict):
+def read_parquet(parquet_file, provider_name):
+
+    # Read in the parquet file
+    parquet_data = pq.ParquetFile(parquet_file)
+
+    # Read parquet data in chunks 
+    for chunk in parquet_data.iter_batches(10000):
+
+        parquet_df = chunk.to_pandas()
+
+        filtered_df = parquet_df[~parquet_df['EventID'].isin([20004, 20098, 20099, 20398, 20399,
+		20400, 20498, 65279, 30100])]
+
+        filtered_df = filtered_df[filtered_df['ProviderName'] == provider_name]
+
+        yield filtered_df
+
+    # Close parquet file 
+    parquet_data.close()
+
+
+def parse_winerror_xml(xml_str, in_dict):
 
     # Decode the XML
     xml_str = xml_str.replace(' xmlns="http://schemas.microsoft.com/win/2004/08/events/event"','').replace('&lt;', '<').replace('&gt;', '>').replace('<![CDATA[', '').replace(']]>', '')
@@ -23,11 +47,78 @@ def parse_xml(xml_str, in_dict):
             out_dict[key] = 'Not available'
 
     return out_dict
+
+def xml_to_col(xml_str, provider_name):
+
+    # Extract CDATA section
+    unescaped_string = html.unescape(xml_str)
+
+    # Extract CDATA section
+    start = unescaped_string.find('<![CDATA[') + len('<![CDATA[')
+    end = unescaped_string.find(']]>')
+    cdata = unescaped_string[start:end]
+
+    # Wrap the CDATA content with a root element
+    wrapped_cdata = '<root>' + cdata + '</root>'
+
+    # Parse the wrapped CDATA as XML
+    root = ET.fromstring(wrapped_cdata)
+
+    if provider_name == 'Application Error':
+        row_dict = {
+            'FaultingApplicationName':'',
+            'AppVersion': '',
+            'AppTimestamp': '',
+            'FaultingModuleName': '',
+            'ModuleVersion': '',
+            'ModuleTimestamp': '',
+            'ExceptionCode': '',
+            'FaultOffset': '',
+            'FaultingProcessId': '',
+            'FaultingApplicationStartTime': '',
+            'FaultingApplicationPath': '',
+            'FaultingApplicationModulePath': '',
+            'ReportId': '',
+            'FaultingPackageFullName': '',
+            'FaultingPackageRelativeApplicationID': '',
+            'FullPath': '',
+            'ProductVersion': '',
+            'ProductName': '',
+            'Publisher': '',
+            'ProgramId': '',
+            'FileId': '',
+            'FileVersion': ''
+        }
+    elif provider_name == 'Application Hang':
+        row_dict = {
+            'Program':'',
+            'ProgramVersion': '',
+            'ProcessID': '',
+            'StartTime': '',
+            'TerminationType': '',
+            'ApplicationPath': '',
+            'ReportID': '',
+            'FaultingPackageFullName': '',
+            'FaultingPackageRelativeApplicationID': '',
+            'HangType': '',
+            'BinaryValue': '',
+            'FullPath': '',
+            'ProductVersion': '',
+            'ProductName': '',
+            'Publisher': '',
+            'ProgramId': '',
+            'FileId': '',
+            'FileVersion': '',
+        }
+
+    for i in range(len(root[0])):
+        row_dict[list(row_dict.items())[i][0]] = root[0][i].text
+    for i in range(len(root[1])):
+        if i < 7:
+            row_dict[list(row_dict.items())[int(i + len(root[0]))][0]] = root[1][i].text
+    return row_dict
     
-def expand_dict_values(in_df, in_dict):
-    
-    # Parse the XML 
-    in_df['dict_EventData'] = in_df['EventDataXML'].apply(lambda x: parse_xml(x, in_dict))
+def expand_dict_values(in_df):
 
     # only get fields that are non-null
     expanded_fields = in_df['dict_EventData'][in_df['dict_EventData'].notnull()]
@@ -41,49 +132,76 @@ def expand_dict_values(in_df, in_dict):
 
     return result
 
-def process_win_errors_file(infile, outfile):
-
-    # Read in the excel file
-    df = pd.read_excel(infile)
+def process_event_files(infiles, outfile, provider_name):
 
     # Denote positions of the data in the XML string
-    windows_error_dict = {"Data_1": 0,
-                        "FaultBucketType": 1, 
-                        "EventName": 2, 
-                        "Response": 3,
-                        "CabID": 4,
-                        "ProblemSignatureP1_Application": 5,
-                        "ProblemSignatureP2_AppVersion": 6,
-                        "ProblemSignatureP3": 7,
-                        "ProblemSignatureP4_Module": 8,
-                        "ProblemSignatureP5_ModuleVersion": 9,
-                        "ProblemSignatureP6": 10,
-                        "ProblemSignatureP7_ExceptionCode": 11,
-                        "ProblemSignatureP8": 12,
-                        "ProblemSignatureP9": 13, 
-                        "ProblemSignatureP10": 14,
-                        "AttachedFiles": 15,
-                        "AttachedFilesPath": 16,
-                        "AnalysisSymbol": 17,
-                        "RecheckingForSolution": 18,
-                        "ReportID": 19,
-                        "HashedBucket": 20,
-                        "CabGuid": 21
-                        }
-    
-    # Call the data processing function 
-    out_df = expand_dict_values(df, windows_error_dict)
+    if provider_name == 'Windows Error Reporting':
+        attr_dict = {"Data_1": 0,
+                    "FaultBucketType": 1, 
+                    "EventName": 2, 
+                    "Response": 3,
+                    "CabID": 4,
+                    "ProblemSignatureP1_Application": 5,
+                    "ProblemSignatureP2_AppVersion": 6,
+                    "ProblemSignatureP3": 7,
+                    "ProblemSignatureP4_Module": 8,
+                    "ProblemSignatureP5_ModuleVersion": 9,
+                    "ProblemSignatureP6": 10,
+                    "ProblemSignatureP7_ExceptionCode": 11,
+                    "ProblemSignatureP8": 12,
+                    "ProblemSignatureP9": 13, 
+                    "ProblemSignatureP10": 14,
+                    "AttachedFiles": 15,
+                    "AttachedFilesPath": 16,
+                    "AnalysisSymbol": 17,
+                    "RecheckingForSolution": 18,
+                    "ReportID": 19,
+                    "HashedBucket": 20,
+                    "CabGuid": 21
+                    }
+        
+    # Define an output dataframe for accumulating data
+    result_df = pd.DataFrame()
+
+    for infile in infiles:
+        print("beginning to process " + infile)
+        t1=time.time()
+
+        # Read in the parquet file and get the generator
+        dataframes = read_parquet(infile, provider_name)
+
+        for df in dataframes:
+
+            if provider_name in ('Application Hang', 'Application Error'):
+
+                # Parse the XML 
+                df['dict_EventData'] = df['EventDataXML'].apply(lambda x: xml_to_col(x, provider_name))
+
+            elif provider_name == 'Windows Error Reporting':
+
+                # Parse the XML 
+                df['dict_EventData'] = df['EventDataXML'].apply(lambda x: parse_winerror_xml(x, attr_dict))
+            
+            # Call the data processing function 
+            out_df = expand_dict_values(df)
+
+            # Append to the output df 
+            result_df = pd.concat([result_df, out_df], axis=0)
+        
+        t2=time.time()
+        print(("It takes %s seconds to process "+infile) % (t2 - t1))
 
     # drop unneeeded columns
     dont_save = ['EventDataXML', 'dict_EventData']
     out_df = out_df[[col for col in out_df.columns if col not in dont_save]]
 
-    # Save result to CSV
-    out_df.to_csv(outfile)
+    # Save result to parquet
+    out_df.to_parquet(outfile)
 
     return out_df
 
 
 if __name__ == '__main__':
 
-    df = process_win_errors_file("WindowsError_Events_Sample.xlsx", "WindowsError_Events_PARSED.csv")
+    files_to_process = [r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_1.parquet", r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_2.parquet"]
+    process_event_files(files_to_process, "WindowsError_Events_PARSED.parquet", 'Windows Error Reporting')
