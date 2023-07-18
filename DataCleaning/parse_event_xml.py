@@ -193,15 +193,13 @@ def process_event_files(infiles, outfile, provider_name):
 
     # drop unneeeded columns
     dont_save = ['EventDataXML', 'dict_EventData']
-    out_df = out_df[[col for col in out_df.columns if col not in dont_save]]
+    result_df = result_df[[col for col in result_df.columns if col not in dont_save]]
 
     # Save result to parquet
-    out_df.to_parquet(outfile)
-
-    return out_df
+    result_df.to_parquet(outfile)
 
 
 if __name__ == '__main__':
 
     files_to_process = [r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_1.parquet", r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_2.parquet"]
-    process_event_files(files_to_process, "WindowsError_Events_PARSED.parquet", 'Windows Error Reporting')
+    process_event_files(files_to_process, "AppError_Events_PARSED.parquet", 'Application Error')
