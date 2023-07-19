@@ -18,15 +18,20 @@ def read_parquet(parquet_file, provider_name):
 
         parquet_df = chunk.to_pandas()
 
-        filtered_df = parquet_df[~parquet_df['EventID'].isin([20004, 20098, 20099, 20398, 20399,
-		20400, 20498, 65279, 30100])]
+        if provider_name != 'Boot':
 
-        filtered_df = filtered_df[filtered_df['ProviderName'] == provider_name]
+            filtered_df = parquet_df[~parquet_df['EventID'].isin([20004, 20098, 20099, 20398, 20399,
+            20400, 20498, 65279, 30100])]
 
-        yield filtered_df
+            filtered_df = filtered_df[filtered_df['ProviderName'] == provider_name]
+
+            yield filtered_df
+        
+        else:
+            yield parquet_df
 
     # Close parquet file 
-    parquet_data.close()
+    #parquet_data.close()
 
 
 def parse_winerror_xml(xml_str, in_dict):
@@ -45,6 +50,39 @@ def parse_winerror_xml(xml_str, in_dict):
         
         except:
             out_dict[key] = 'Not available'
+
+    return out_dict
+
+def parse_boot_xml(xml_str):
+    
+    # Decode the xml
+    cleaned_xml = xml_str.replace(' xmlns="http://schemas.microsoft.com/win/2004/08/events/event"','').replace('&lt;', '<').replace('&gt;', '>').replace('<![CDATA[', '').replace(']]>', '')
+
+    #Blank dict to add data
+    out_dict = {}
+
+    # Parse the xml 
+    root = ET.fromstring(cleaned_xml)
+
+    # Grab the power off time
+    for val in root.find('.//BootReason'):
+        if val.tag == 'EventData' and 'SystemPowerOffTime' in val.attrib:
+            out_dict['SystemPowerOffTime'] = val.attrib['SystemPowerOffTime']
+            break
+
+    # Grab the EventData
+    attrs = ['MachineName', 'AppVersion', 'Reason', 'ExceptionCode', 'param5', 'ActionDescription', 'SystemPath']
+    for i, val in enumerate(root.find('.//EventData')):
+        out_dict[attrs[i]] = val.text
+        if i == 6:
+            break
+            
+    # Grab Custom Data
+    try:
+        for val in root.find('.//CustomData'):
+            out_dict[val.tag] = val.text
+    except:
+        pass
 
     return out_dict
 
@@ -182,6 +220,10 @@ def process_event_files(infiles, outfile, provider_name):
                 # Parse the XML 
                 df['dict_EventData'] = df['EventDataXML'].apply(lambda x: parse_winerror_xml(x, attr_dict))
             
+            else:
+                # Parse boot XML 
+                df['dict_EventData'] = df['EventDataXML'].apply(lambda x: parse_boot_xml(x))
+            
             # Call the data processing function 
             out_df = expand_dict_values(df)
 
@@ -201,5 +243,5 @@ def process_event_files(infiles, outfile, provider_name):
 
 if __name__ == '__main__':
 
-    files_to_process = [r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_1.parquet", r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventRawResultItem_2.parquet"]
-    process_event_files(files_to_process, "AppError_Events_PARSED.parquet", 'Application Error')
+    files_to_process = [r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventBootResult.parquet"]
+    process_event_files(files_to_process, r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Boot_Events_PARSED.parquet", 'Boot')
