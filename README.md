@@ -9,7 +9,7 @@ Jacob Rankin, RJ Edgerly, Parth Limachia
 Information technology delivery is an evolving challenge for organizations. Deploying IT solutions for thousands of employees across a range of geographies involves complex issues and unexpected errors. Proactive monitoring of hardware and software assets across an organization can help identify such issues and implement resolutions to minimize impact to the business. Our project aims to apply machine learning on hardware, software, and service desk data from a mid-size organization with the goal of improving client services delivery at the firm.
 
 ## Usage Limitations
-All are welcome to use this repository as a starting point for future IT data science projects. The underlying data, however, cannot be redistributed due their sensitivity. 
+All are welcome to use this repository as a starting point for future IT data science projects. The underlying data, however, cannot be redistributed due to their sensitivity. 
 
 ## Getting Started
 Follow the instructions below for getting a local copy running on your machine.
