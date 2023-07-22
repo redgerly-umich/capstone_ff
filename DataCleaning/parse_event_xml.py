@@ -243,5 +243,5 @@ def process_event_files(infiles, outfile, provider_name):
 
 if __name__ == '__main__':
 
-    files_to_process = [r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Persist_EventBootResult.parquet"]
-    process_event_files(files_to_process, r"C:\Users\JRankin\ITCS_Analytics\Capstone\assets\Boot_Events_PARSED.parquet", 'Boot')
+    files_to_process = [r"assets\Persist_EventBootResult.parquet"]
+    process_event_files(files_to_process, r"assets\Boot_Events_PARSED.parquet", 'Boot')
