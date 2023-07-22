@@ -1,4 +1,4 @@
-# Proactive IT: a machine learning project to improve IT Client Services
+# Proactive IT: a machine learning project to improve IT client services
 University of Michigan Master of Applied Data Science Spring/Summer 2023 Capstone Project
 
 Jacob Rankin, RJ Edgerly, Parth Limachia
