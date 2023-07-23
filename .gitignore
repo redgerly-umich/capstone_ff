@@ -4,6 +4,7 @@ do_not_commit/**
 .idea/**
 en_web_core_trf_updated/**
 DataCollection/assets/
+DataCleaning/assets/
 
 # Ignore cred files
 fun.json
