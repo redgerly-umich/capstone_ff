@@ -3,6 +3,11 @@ DatabaseTableUpload/assets/**
 do_not_commit/**
 .idea/**
 en_web_core_trf_updated/**
+DataCollection/assets/
+
+# Ignore cred files
+fun.json
+creds.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
