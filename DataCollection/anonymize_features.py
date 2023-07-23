@@ -100,7 +100,7 @@ if __name__ == '__main__':
     with open('assets/fun.json') as f:
             creds = json.load(f)
 
-    # Connect to uat dbConfigManagerStage database 
+    # Connect to database 
     dbconfig_conn = connect_to_database(creds["on_prem_server"], creds["on_prem_db"])
 
     # Read in the attributes dataframe
