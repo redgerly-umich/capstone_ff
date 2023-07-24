@@ -112,7 +112,7 @@ def get_all_data():
 
     # Define the incident and problem instances to pull
     instance_incident = endpoint + "/api/now/table/incident?sysparm_query=sys_created_on>=javascript:gs.dateGenerate('2023-01-01','00:00:00')"
-    instance_problem = endpoint + "/api/now/table/problem?sysparm_query=sys_created_on>=javascript:gs.dateGenerate('2023-04-01','00:00:00')"
+    instance_problem = endpoint + "/api/now/table/problem?sysparm_query=sys_created_on>=javascript:gs.dateGenerate('2023-01-01','00:00:00')"
 
     # Get INC and problem data 
     df_inc = get_records(secrets, headers, instance_incident)
