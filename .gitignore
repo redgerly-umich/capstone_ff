@@ -8,6 +8,7 @@ DataCleaning/assets/
 UnsupervisedModel/assets/
 DataCleaning/do_not_commit/
 EDA/do_not_commit/
+FeatureEngineering/assets/
 
 # Ignore cred files
 fun.json
