@@ -1,7 +1,7 @@
 To replicate conda environment:
 1. Pull the environment.yml file.
 2. In terminal, run 'conda env create -f environment.yml'.
-3. Type 'conda activate azure_tables' to switch to the new environment.
+3. Type 'conda activate ff_env' to activate new environment.
 
 'environment.yml' is preferred over 'requirements.txt', but you may also load a conda environment from 'requirements.txt'.
 https://stackoverflow.com/questions/48787250/set-up-virtualenv-using-a-requirements-txt-generated-by-conda
