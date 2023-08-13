@@ -1,0 +1,5 @@
+name: ff_env
+channels:
+  - defaults
+  - conda-forge
+prefix: ./
