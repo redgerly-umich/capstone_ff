@@ -6,6 +6,7 @@ en_web_core_trf_updated/**
 DataCollection/assets/
 DataCleaning/assets/
 UnsupervisedModel/assets/
+SupervisedModel/assets/
 DataCleaning/do_not_commit/
 EDA/do_not_commit/
 FeatureEngineering/assets/
