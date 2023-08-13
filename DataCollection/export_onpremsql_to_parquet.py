@@ -1,6 +1,5 @@
 # Import Modules
-import pandas as pd 
-import pyarrow.parquet as pq
+import pandas as pd
 import pyodbc
 import json
 
