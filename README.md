@@ -1,4 +1,4 @@
-# Proactive IT: a machine learning project to improve IT client services
+# Proactive IT: forecasting Microsoft Configuration Manager event errors
 University of Michigan Master of Applied Data Science Spring/Summer 2023 Capstone Project
 
 Jacob Rankin, RJ Edgerly, Parth Limachia
@@ -19,7 +19,7 @@ Follow the instructions below for getting a local copy running on your machine.
    ```
    git clone https://github.com/redgerly-umich/capstone_ff.git
    ```
-2. Install and set up the project dependencies using the requirements.txt file.
+2. Install and set up the project dependencies using the requirements.txt file, which is found in the ff_env directory:
    ```
    pip install -r requirements.txt
    ```
