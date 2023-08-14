@@ -1,5 +1,8 @@
-import pyodbc
+# Code was adopted from Andrew Villazon's Blog Article,
+# Titled, "Use Python to quickly load lots of data to database"
+# https://www.andrewvillazon.com/quickly-load-data-db-python/
 
+import pyodbc
 
 def execute_query(q, conn_params, row_expression):
     connection = pyodbc.connect(conn_params)
