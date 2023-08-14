@@ -43,6 +43,13 @@ def filter_inc_data(inc_df, category_df):
     return inc_df 
 
 def identify_pii(in_df, field):
+    '''
+    Code was adopted from demos provied by 
+    Leo van der Meulen in his blog post, "Remove
+    personal information from a text with Python 
+    - Part II" 
+    https://towardsdatascience.com/remove-personal-information-from-a-text-with-python-part-ii-ner-2e6529d409a6
+    '''
     
     nlp = English()
 
