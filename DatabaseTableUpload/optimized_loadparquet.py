@@ -1,3 +1,7 @@
+# Code was adopted from Andrew Villazon's Blog Article,
+# Titled, "Use Python to quickly load lots of data to database"
+# https://www.andrewvillazon.com/quickly-load-data-db-python/
+
 # Import python standard libraries
 import json 
 from concurrent import futures
